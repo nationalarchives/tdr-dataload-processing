@@ -7,7 +7,15 @@ ThisBuild / organization := "uk.gov.nationalarchives"
 ThisBuild / organizationName := "dataload-processing"
 
 libraryDependencies ++= Seq(
-  scalaTest % Test
+  circeCore,
+  circeGeneric,
+  circeParser,
+  mockitoScala % Test,
+  mockitoScalaTest % Test,
+  s3Utils,
+  scalaTest % Test,
+  typeSafeConfig,
+  wiremock % Test
 )
 
 (Test / fork) := true
