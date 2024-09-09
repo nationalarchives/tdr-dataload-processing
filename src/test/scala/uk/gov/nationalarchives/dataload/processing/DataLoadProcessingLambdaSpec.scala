@@ -23,7 +23,7 @@ class DataLoadProcessingLambdaSpec extends ExternalServicesSpec {
     case Right(json) => json
   }
 
-  "'processDataLoad'" should "throw an error in incorrect input event" in {
+  "'processDataLoad'" should "throw an error with invalid input event" in {
     val incorrectInputEvent = """{ "user":  "f0a73877-6057-4bbb-a1eb-7c7b73cab586" }"""
     val inputStream = new ByteArrayInputStream(incorrectInputEvent.getBytes())
     val exception = intercept[RuntimeException] {
@@ -33,30 +33,32 @@ class DataLoadProcessingLambdaSpec extends ExternalServicesSpec {
   }
 
   "'processDataLoad'" should "return the expected json" in {
-    mockS3GetResponse("metadata-sidecar.json")
-    val inputEvent = """{ "userId":  "f0a73877-6057-4bbb-a1eb-7c7b73cab586", "s3Bucket":  "test-bucket", "s3BucketKey" :  "metadata-sidecar.json" }"""
+    val jsonFileName = "metadata-sidecars.json"
+    mockS3GetResponse(jsonFileName)
+    val inputEvent = s"""{ "userId":  "f0a73877-6057-4bbb-a1eb-7c7b73cab586", "s3SourceBucket":  "test-bucket", "s3SourceKey" :  "$jsonFileName" }"""
     val inputStream = new ByteArrayInputStream(inputEvent.getBytes())
-    val expectedResult = getExpectedJson("metadata-sidecar.json")
+    val expectedResult = getExpectedJson(jsonFileName)
     val result = new DataLoadProcessingLambda().processDataLoad(inputStream)
     result shouldBe expectedResult
   }
 
-  "'processDataLoad'" should "throw an error if sidecar metadata json is invalid" in {
-    mockS3GetResponse("invalid.json")
-    val inputEvent = """{ "userId":  "f0a73877-6057-4bbb-a1eb-7c7b73cab586", "s3Bucket":  "test-bucket", "s3BucketKey" :  "invalid.json" }"""
+  "'processDataLoad'" should "throw an error if source metadata json is invalid" in {
+    val jsonFileName = "invalid.json"
+    mockS3GetResponse(jsonFileName)
+    val inputEvent = s"""{ "userId":  "f0a73877-6057-4bbb-a1eb-7c7b73cab586", "s3SourceBucket":  "test-bucket", "s3SourceKey" :  "$jsonFileName" }"""
     val inputStream = new ByteArrayInputStream(inputEvent.getBytes())
     val exception = intercept[RuntimeException] {
       new DataLoadProcessingLambda().processDataLoad(inputStream)
     }
-    exception.getMessage shouldEqual "Failed to retrieve metadata sidecar invalid.json: expected : got '2001-1...' (line 2, column 38)"
+    exception.getMessage shouldEqual "Failed to retrieve source metadata invalid.json: expected : got '2001-1...' (line 3, column 40)"
   }
 
-  "'processDataLoad'" should "throw an error if sidecar metadata does not exist" in {
-    val inputEvent = """{ "userId":  "f0a73877-6057-4bbb-a1eb-7c7b73cab586", "s3Bucket":  "test-bucket", "s3BucketKey" :  "non-existent.json" }"""
+  "'processDataLoad'" should "throw an error if source metadata does not exist" in {
+    val inputEvent = """{ "userId":  "f0a73877-6057-4bbb-a1eb-7c7b73cab586", "s3SourceBucket":  "test-bucket", "s3SourceKey" :  "non-existent.json" }"""
     val inputStream = new ByteArrayInputStream(inputEvent.getBytes())
     val exception = intercept[RuntimeException] {
       new DataLoadProcessingLambda().processDataLoad(inputStream)
     }
-    exception.getMessage shouldEqual "Failed to retrieve metadata sidecar non-existent.json: null (Service: S3, Status Code: 404, Request ID: null)"
+    exception.getMessage shouldEqual "Failed to retrieve source metadata non-existent.json: null (Service: S3, Status Code: 404, Request ID: null)"
   }
 }
