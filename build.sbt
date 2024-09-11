@@ -7,9 +7,12 @@ ThisBuild / organization := "uk.gov.nationalarchives"
 ThisBuild / organizationName := "dataload-processing"
 
 libraryDependencies ++= Seq(
+  authUtils,
   circeCore,
   circeGeneric,
   circeParser,
+  generatedGraphql,
+  graphqlClient,
   mockitoScala % Test,
   mockitoScalaTest % Test,
   s3Utils,

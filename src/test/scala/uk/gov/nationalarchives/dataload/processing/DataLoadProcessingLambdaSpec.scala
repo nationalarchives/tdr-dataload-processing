@@ -10,6 +10,7 @@ import java.nio.file.{Files, Paths}
 import scala.io.Source
 
 class DataLoadProcessingLambdaSpec extends ExternalServicesSpec {
+
   def mockS3GetResponse(fileName: String): StubMapping = {
     val filePath = getClass.getResource(s"/$fileName").getFile
     val bytes = Files.readAllBytes(Paths.get(filePath))

@@ -1,0 +1,17 @@
+[
+  {"matchId":0,"PropertyName":"property_string","PropertyValue":"a string value"},
+  {"matchId":1,"PropertyName":"property_string","PropertyValue":"a string value"},
+  {"matchId":2,"PropertyName":"property_string","PropertyValue":"a string value"},
+  {"matchId":0,"PropertyName":"property_integer","PropertyValue":"3"},
+  {"matchId":1,"PropertyName":"property_integer","PropertyValue":"3"},
+  {"matchId":2,"PropertyName":"property_integer","PropertyValue":"3"},
+  {"matchId":0,"PropertyName":"property_boolean","PropertyValue":"true"},
+  {"matchId":1,"PropertyName":"property_boolean","PropertyValue":"true"},
+  {"matchId":2,"PropertyName":"property_boolean","PropertyValue":"true"},
+  {"matchId":0,"PropertyName":"property_date","PropertyValue":"2012-12-12"},
+  {"matchId":1,"PropertyName":"property_date","PropertyValue":"2012-12-12"},
+  {"matchId":2,"PropertyName":"property_date","PropertyValue":"2012-12-12"},
+  {"matchId":0,"PropertyName":"property_referenced","PropertyValue":"valid"},
+  {"matchId":1,"PropertyName":"property_referenced","PropertyValue":"valid"},
+  {"matchId":2,"PropertyName":"property_referenced","PropertyValue":"valid"}
+]

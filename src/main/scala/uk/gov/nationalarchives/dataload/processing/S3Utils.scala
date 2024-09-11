@@ -10,12 +10,11 @@ import uk.gov.nationalarchives.dataload.processing.ApplicationConfig.s3Endpoint
 import scala.util.Try
 
 class S3Utils(s3Client: S3Client) {
-  def getMetadataJson(bucket: String, key: String): Either[Throwable, Json] = {
+  def getMetadataJson(bucket: String, key: String): Either[Throwable, String] = {
     for {
       s3Response <- Try(s3Client.getObject(GetObjectRequest.builder.bucket(bucket).key(key).build)).toEither
       jsonString = s3Response.readAllBytes().map(_.toChar).mkString
-      json <- parse(jsonString)
-    } yield json
+    } yield jsonString
   }
 }
 
