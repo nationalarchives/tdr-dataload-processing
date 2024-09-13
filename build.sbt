@@ -17,6 +17,7 @@ libraryDependencies ++= Seq(
   mockitoScalaTest % Test,
   s3Utils,
   scalaTest % Test,
+  schemaUtils,
   typeSafeConfig,
   wiremock % Test
 )

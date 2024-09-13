@@ -12,8 +12,9 @@ object Dependencies {
   lazy val graphqlClient = "uk.gov.nationalarchives" %% "tdr-graphql-client" % "0.0.173"
   lazy val mockitoScala = "org.mockito" %% "mockito-scala" % mockitoScalaVersion
   lazy val mockitoScalaTest = "org.mockito" %% "mockito-scala-scalatest" % mockitoScalaVersion
-  lazy val s3Utils = "uk.gov.nationalarchives" %% "s3-utils" % "0.1.200"
+  lazy val s3Utils = "uk.gov.nationalarchives" %% "s3-utils" % "0.1.205"
   lazy val scalaTest = "org.scalatest" %% "scalatest" % "3.2.19"
+  lazy val schemaUtils = "uk.gov.nationalarchives" %% "tdr-schema-utils" %"0.0.54-SNAPSHOT"
   lazy val typeSafeConfig = "com.typesafe" % "config" % "1.4.3"
   lazy val wiremock = "com.github.tomakehurst" % "wiremock" % "3.0.1"
 }
