@@ -11,10 +11,12 @@ The Lambda takes an input event:
     {
       "userId":  "f0a73877-6057-4bbb-a1eb-7c7b73cab586",
       "s3SourceBucket":  "some-bucket",
-      "s3SourceKey" :  "some-key.json"
+      "s3SourceKey" :  "some-key.json",
+      "sourceSystem" : "sharepoint"
     }
 ```
 
 * `userId`: Id of the user who uploaded the data
 * `s3SourceBucket`: S3 bucket containing the aggregated metadata
 * `s3SourceKey`: S3 key of the aggregated metadata json
+* `sourceSystem`: the system from which the metadata comes from, for example "sharepoint", "google drive"

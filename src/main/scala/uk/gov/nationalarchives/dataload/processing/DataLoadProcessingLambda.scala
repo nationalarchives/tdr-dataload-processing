@@ -1,5 +1,6 @@
 package uk.gov.nationalarchives.dataload.processing
 
+import cats.effect.IO
 import io.circe.Json
 import io.circe.generic.auto._
 import io.circe.parser.decode
@@ -27,7 +28,7 @@ class DataLoadProcessingLambda {
 }
 
 object DataLoadProcessingLambda {
-  case class EventInput(userId: UUID, s3SourceBucket: String, s3SourceKey: String)
+  case class EventInput(userId: UUID, s3SourceBucket: String, s3SourceKey: String, sourceSystem: String)
 
   def getEventInput(inputString: String): EventInput = {
     decode[EventInput](inputString) match {

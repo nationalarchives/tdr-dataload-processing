@@ -33,9 +33,9 @@ class DataLoadProcessingLambdaSpec extends ExternalServicesSpec {
   }
 
   "'processDataLoad'" should "return the expected json" in {
-    val jsonFileName = "metadata-sidecars.json"
+    val jsonFileName = "sharepoint-metadata-sidecars.json"
     mockS3GetResponse(jsonFileName)
-    val inputEvent = s"""{ "userId":  "f0a73877-6057-4bbb-a1eb-7c7b73cab586", "s3SourceBucket":  "test-bucket", "s3SourceKey" :  "$jsonFileName" }"""
+    val inputEvent = s"""{ "userId":  "f0a73877-6057-4bbb-a1eb-7c7b73cab586", "s3SourceBucket":  "test-bucket", "s3SourceKey" :  "$jsonFileName", "sourceSystem" : "sharepoint" }"""
     val inputStream = new ByteArrayInputStream(inputEvent.getBytes())
     val expectedResult = getExpectedJson(jsonFileName)
     val result = new DataLoadProcessingLambda().processDataLoad(inputStream)
@@ -45,7 +45,7 @@ class DataLoadProcessingLambdaSpec extends ExternalServicesSpec {
   "'processDataLoad'" should "throw an error if source metadata json is invalid" in {
     val jsonFileName = "invalid.json"
     mockS3GetResponse(jsonFileName)
-    val inputEvent = s"""{ "userId":  "f0a73877-6057-4bbb-a1eb-7c7b73cab586", "s3SourceBucket":  "test-bucket", "s3SourceKey" :  "$jsonFileName" }"""
+    val inputEvent = s"""{ "userId":  "f0a73877-6057-4bbb-a1eb-7c7b73cab586", "s3SourceBucket":  "test-bucket", "s3SourceKey" :  "$jsonFileName", "sourceSystem" : "sharepoint" }"""
     val inputStream = new ByteArrayInputStream(inputEvent.getBytes())
     val exception = intercept[RuntimeException] {
       new DataLoadProcessingLambda().processDataLoad(inputStream)
@@ -54,7 +54,8 @@ class DataLoadProcessingLambdaSpec extends ExternalServicesSpec {
   }
 
   "'processDataLoad'" should "throw an error if source metadata does not exist" in {
-    val inputEvent = """{ "userId":  "f0a73877-6057-4bbb-a1eb-7c7b73cab586", "s3SourceBucket":  "test-bucket", "s3SourceKey" :  "non-existent.json" }"""
+    val inputEvent =
+      """{ "userId":  "f0a73877-6057-4bbb-a1eb-7c7b73cab586", "s3SourceBucket":  "test-bucket", "s3SourceKey" :  "non-existent.json", "sourceSystem" : "sharepoint" }"""
     val inputStream = new ByteArrayInputStream(inputEvent.getBytes())
     val exception = intercept[RuntimeException] {
       new DataLoadProcessingLambda().processDataLoad(inputStream)
