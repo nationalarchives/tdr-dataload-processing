@@ -1,6 +1,8 @@
 package uk.gov.nationalarchives.dataload.processing
 
 import graphql.codegen.AddFilesAndMetadata.addFilesAndMetadata.AddFilesAndMetadata
+import graphql.codegen.AddOrUpdateBulkFileMetadata.addOrUpdateBulkFileMetadata.Variables
+import graphql.codegen.types.{AddOrUpdateFileMetadata, AddOrUpdateMetadata, ClientSideMetadataInput}
 import io.circe.{Json, JsonObject, ParsingFailure, parser}
 import io.circe.generic.auto._
 import io.circe.parser.decode
@@ -13,7 +15,7 @@ import scala.io.Source
 class DataLoadProcessingLambda {
   private val s3Utils = S3Utils()
 
-  private def stubAddFilesResponse(entries: List[FileEntry]) = {
+  private def stubAddFilesResponse(entries: List[ClientSideMetadataInput]): List[AddFilesAndMetadata] = {
     entries.map(e => AddFilesAndMetadata(UUID.randomUUID(), e.matchId))
   }
 
@@ -26,44 +28,35 @@ class DataLoadProcessingLambda {
       case Right(json) => json
     }
 
+    //Get the aggregated metadata sidecars json
     val metadataJson = parseResult.asArray.get.map(_.asObject.get.toMap)
+    //Retrieve key mappings
     val keys = metadataJson.flatMap(_.keys).toSet
+    //iterate over json and convert to objects mapped to the matchId
     val entries = metadataJson.map(j => {
       val matchId: Long = j("matchId").as[Long].getOrElse(0)
-      val fileSize: Long = j("ClientSideFileSize").as[Long].getOrElse(0)
-      FileEntry(matchId, fileSize)
-    }).toList
-    val entriesResponse = stubAddFilesResponse(entries).groupBy(_.matchId)
-    val metadata = metadataJson.map(j => {
-      val matchId: Long = j("matchId").as[Long].getOrElse(0)
-      val fileId = entriesResponse(matchId).map(_.fileId).head
+      val fileSize: Long = j("File_x0020_Size").as[Long].getOrElse(0)
       val metadataEntries: List[Entry] = j.flatMap(e => {
         if (e._1 != "matchId") {
           Some(Entry(e._1, e._2.asString.getOrElse("")))
         } else None
       }).toList
-      MetadataInput(fileId, metadataEntries)
-    })
-
-    val objs = parseResult.asArray.get.map(j => {
-      val md = j.asObject.get.toMap
-      val matchId: Long = md("matchId").as[Long].getOrElse(0)
-      val fileSize: Long = md("ClientSideFileSize").as[Long].getOrElse(0)
-      val entry = FileEntry(matchId, fileSize)
-      val metadataEntries = md.map(e => Entry(e._1, e._2.asString.getOrElse("")))
-      (entry, metadataEntries)
+      (ClientSideMetadataInput("", "", 1, fileSize, matchId), matchId -> metadataEntries)
     }).toList
-
-
-//    val x = decode[List[Entry]](sourceJson) match {
-//      case Right(i) => i
-//    }
-//    val y = x.groupBy(_.matchId)
-//    val z: List[FileEntry] = y.map(e => {
-//      val ps = e._2
-//      val fileSize = ps.filter(_.PropertyName == "property_integer").head.PropertyValue.toLong
-//      FileEntry(e._1, fileSize)
-//    }).toList
+    //add the entries to DB and get fileId to matchId map
+    val entriesResponse = stubAddFilesResponse(entries.map(_._1)).groupBy(_.matchId)
+    //convert the metadata properties to DB input type
+    //will need to filter between 'editable' and 'non-editable'
+    //'editable' should go to CSV for draft metadata consumption
+    val metadataInput = entries.map(_._2).map(e => {
+      val fileId = entriesResponse(e._1).map(_.fileId).head
+      val metadataEntries = e._2.flatMap(me => {
+        if (me.PropertyValue != "matchId") {
+          Some(AddOrUpdateMetadata(me.PropertyName, me.PropertyValue))
+        } else None
+      })
+      AddOrUpdateFileMetadata(fileId, metadataEntries)
+    })
 
     sourceJsonString
   }
