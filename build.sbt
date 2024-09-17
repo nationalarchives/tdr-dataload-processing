@@ -8,6 +8,7 @@ ThisBuild / organizationName := "dataload-processing"
 
 libraryDependencies ++= Seq(
   authUtils,
+  awsSsm,
   circeCore,
   circeGeneric,
   circeParser,
