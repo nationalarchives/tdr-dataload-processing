@@ -38,7 +38,8 @@ class DataLoadProcessingLambdaSpec extends ExternalServicesSpec {
 
   "'processDataLoad'" should "return the expected json" in {
     authOkJson()
-    graphqlOkJson()
+    graphqlOkJsonAddFileMetadata()
+    graphqlOkJsonAddFiles()
     val jsonFileName = "metadata-sidecars.json"
     mockS3GetResponse(jsonFileName)
     val inputEvent = s"""{ "userId": "f0a73877-6057-4bbb-a1eb-7c7b73cab586", "transferId": "f0a73877-6057-4bbb-a1eb-7c7b73cab586", "s3SourceBucket":  "test-bucket", "s3SourceKey" :  "$jsonFileName" }"""

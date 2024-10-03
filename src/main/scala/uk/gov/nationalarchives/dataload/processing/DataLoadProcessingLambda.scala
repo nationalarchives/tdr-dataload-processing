@@ -25,9 +25,11 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class DataLoadProcessingLambda {
   implicit val backend: SttpBackend[Identity, Any] = HttpURLConnectionBackend()
+  implicit val keycloakDeployment: TdrKeycloakDeployment = TdrKeycloakDeployment(authUrl, "tdr", timeToLiveSecs)
   private val s3Utils = S3Utils()
   private val mappedPropertyKeys = SchemaUtils.originalKeyToAlternateKeyMapping("sharePointHeader", "tdrDataLoadHeader")
-  implicit val keycloakDeployment: TdrKeycloakDeployment = TdrKeycloakDeployment(authUrl, "tdr", timeToLiveSecs)
+  private val propertyTypesMap = SchemaUtils.propertyTypeMapping(Some("tdrDataLoadHeader"))
+
   private val keycloakUtils = new KeycloakUtils()
   private val graphQlApi: GraphQlApi = GraphQlApi(keycloakUtils)(backend, keycloakDeployment)
 
@@ -62,7 +64,7 @@ class DataLoadProcessingLambda {
     AddOrUpdateFileMetadata(fileId, metadataEntries)
   }
 
-  def processDataLoad(inputStream: InputStream) = {
+  def processDataLoad(inputStream: InputStream): IO[List[AddOrUpdateFileMetadata]] = {
     val inputString = Source.fromInputStream(inputStream).mkString
     val input = getEventInput(inputString)
     val clientSecret = getClientSecret(clientSecretPath, ssmEndpoint)
@@ -76,9 +78,11 @@ class DataLoadProcessingLambda {
         AddFileAndMetadataInput(input.transferId, matchedEntries.map(_._1), None)
       )
       matchedFileEntries = fileEntries.groupBy(_.matchId)
+      systemProperties = propertyTypesMap.filter(_._2 == "System").keys.toSet
       metadataInput = matchedEntries.map(_._2).map(i => {
         val fileId = matchedFileEntries(i._1).map(_.fileId).head
-        convertToMetadataInput(fileId, i._2)
+        val systemMetadata = i._2.filter(e => systemProperties.contains(e.PropertyName))
+        convertToMetadataInput(fileId, systemMetadata)
       })
       systemMetadata <- graphQlApi.addOrUpdateBulkFileMetadata(
         input.transferId, clientSecret, metadataInput)

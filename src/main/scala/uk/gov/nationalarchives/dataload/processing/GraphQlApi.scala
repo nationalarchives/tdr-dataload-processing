@@ -32,9 +32,9 @@ class GraphQlApi(
     data <- IO.fromOption(result.data)(new RuntimeException("No custom metadata definitions found"))
   } yield data.addFilesAndMetadata
 
-  def addOrUpdateBulkFileMetadata(consignmentId: UUID, clientSecret: String, fileMetadata: List[AddOrUpdateFileMetadata])(implicit
-                                                                                                                          executionContext: ExecutionContext
-  ): IO[List[AddOrUpdateBulkFileMetadata]] =
+  def addOrUpdateBulkFileMetadata(consignmentId: UUID, clientSecret: String,
+                                  fileMetadata: List[AddOrUpdateFileMetadata])
+                                 (implicit executionContext: ExecutionContext): IO[List[AddOrUpdateBulkFileMetadata]] =
     for {
       token <- keycloak.serviceAccountToken(clientId, clientSecret).toIO
       metadata <- addOrUpdateBulkFileMetadataClient.getResult(token, aubfm.document, aubfm.Variables(AddOrUpdateBulkFileMetadataInput(consignmentId, fileMetadata)).some).toIO

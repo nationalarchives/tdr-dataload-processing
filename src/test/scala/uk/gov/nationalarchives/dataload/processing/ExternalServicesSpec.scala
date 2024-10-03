@@ -31,11 +31,21 @@ class ExternalServicesSpec extends AnyFlatSpec with BeforeAndAfterEach with Befo
 
   def graphQlUrl: String = wiremockGraphqlServer.url(graphQlPath)
 
-  def graphqlOkJson(): Unit = {
+//  addOrUpdateBulkFileMetadata
+
+  def graphqlOkJsonAddFiles(): Unit = {
     wiremockGraphqlServer.stubFor(
       post(urlEqualTo(graphQlPath))
         .withRequestBody(containing("addFilesAndMetadata"))
         .willReturn(okJson(fromResource(s"json/file-entries-response.json").mkString))
+    )
+  }
+
+  def graphqlOkJsonAddFileMetadata(): Unit = {
+    wiremockGraphqlServer.stubFor(
+      post(urlEqualTo(graphQlPath))
+        .withRequestBody(containing("addOrUpdateBulkFileMetadata"))
+        .willReturn(okJson(fromResource(s"json/add-bulk-file-metadata-response.json").mkString))
     )
   }
 
